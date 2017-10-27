@@ -112,6 +112,7 @@ Datum ST_CollectionExtract(PG_FUNCTION_ARGS);
 Datum ST_CollectionHomogenize(PG_FUNCTION_ARGS);
 Datum ST_IsCollection(PG_FUNCTION_ARGS);
 Datum ST_WrapX(PG_FUNCTION_ARGS);
+Datum ST_FilterByM(PG_FUNCTION_ARGS);
 
 
 /*------------------------------------------------------------------*/
@@ -2982,4 +2983,61 @@ Datum ST_Points(PG_FUNCTION_ARGS)
 		lwmpoint_free(result);
 		PG_RETURN_POINTER(ret);
 	}
+}
+
+
+/*
+ * ST_FilterByM(in geometry, val double precision)
+ */
+Datum ST_FilterByM(PG_FUNCTION_ARGS);
+PG_FUNCTION_INFO_V1(ST_FilterByM);
+Datum ST_FilterByM(PG_FUNCTION_ARGS)
+{
+  GSERIALIZED *geom_in;
+  GSERIALIZED *geom_out;
+  LWGEOM *lwgeom_in;
+  LWGEOM *lwgeom_out;
+  double min, max;
+  
+  if ( PG_NARGS() > 0 && ! PG_ARGISNULL(0))
+  {
+    geom_in = PG_GETARG_GSERIALIZED_P(0);
+  }
+  else
+  {
+    PG_RETURN_NULL();
+  }
+  
+  if ( PG_NARGS() > 1 && ! PG_ARGISNULL(1))
+    min = PG_GETARG_FLOAT8(1);
+  else
+  {
+    min = DBL_MIN;
+  }
+  if ( PG_NARGS() > 2  && ! PG_ARGISNULL(2))
+    max = PG_GETARG_FLOAT8(2);
+  else
+  {
+    max = DBL_MAX;
+  }
+    
+  
+  lwgeom_in = lwgeom_from_gserialized(geom_in);
+  
+  int hasm = FLAGS_GET_M(lwgeom_in->flags);
+  
+  if(!hasm)
+  {
+    elog(NOTICE,"No M-value, No vertex removed\n");
+    PG_RETURN_POINTER(geom_in);
+  }
+  
+  int srid = lwgeom_in->srid;
+  
+  lwgeom_out = filter_m(lwgeom_in, min, max);
+   
+		geom_out = geometry_serialize(lwgeom_out);
+  lwgeom_free(lwgeom_out);
+  PG_RETURN_POINTER(geom_out);
+    
 }

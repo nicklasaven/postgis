@@ -2397,6 +2397,14 @@ LWGEOM* lwgeom_voronoi_diagram(const LWGEOM* g, const GBOX* env, double toleranc
 */
 int * lwgeom_cluster_2d_kmeans(const LWGEOM **geoms, int ngeoms, int k);
 
+/**
+* Filter vertecies from geometry by it's m-value
+
+* @param geom the input geometry
+* @param min the min m-value in result (including)
+* @param max the max m-value in result (including)
+*/
+LWGEOM* filter_m(LWGEOM *geom, double min,double max);
 
 #endif /* !defined _LIBLWGEOM_H  */
 

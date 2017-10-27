@@ -117,7 +117,8 @@ SA_OBJS = \
 	effectivearea.o \
 	lwkmeans.o \
 	kmeans.o \
-	varint.o
+	varint.o \
+	mval.o
 
 NM_OBJS = \
 	lwspheroid.o
